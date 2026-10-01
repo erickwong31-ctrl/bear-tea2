@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>熊茶館 · 手機點單（香港版）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--bg:#f6efe3;--card:#fffdf7;--brand:#8a5a2b;--brand2:#c98f4a;--accent:#e07b39;--green:#2f7d4f;--text:#3a2f23;--muted:#9c8b74;--line:#eee2cc;--shadow:0 8px 24px rgba(120,85,40,.12)}
+  html,body{height:100%}
+  body{font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+  header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#8a5a2b,#a8723a);color:#fff;padding:14px 16px;box-shadow:0 4px 14px rgba(120,70,20,.25)}
+  .bar{display:flex;align-items:center;gap:12px}
+  .logo{font-size:26px;background:rgba(255,255,255,.9);width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+  .shop{flex:1}.shop h1{font-size:19px;letter-spacing:1px}.shop p{font-size:11px;opacity:.85}
+  .cart-btn{position:relative;background:rgba(255,255,255,.18);border:none;border-radius:12px;padding:9px 12px;color:#fff;font-size:20px;cursor:pointer}
+  .badge{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;min-width:20px;height:20px;border-radius:10px;font-size:12px;display:none;align-items:center;justify-content:center;padding:0 5px}
+  .tabs{position:sticky;top:70px;z-index:19;display:flex;gap:8px;overflow-x:auto;background:var(--bg);padding:10px 14px;scrollbar-width:none;white-space:nowrap}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;font-size:13px;padding:7px 14px;border-radius:20px;background:#fff;color:var(--muted);border:1px solid var(--line);cursor:pointer}
+  .tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  main{flex:1;padding:6px 14px 120px}
+  .sec-title{display:flex;align-items:center;gap:8px;margin:14px 2px 10px}.sec-title span{font-size:14px;font-weight:700;color:var(--brand)}
+  .good{background:var(--card);border-radius:14px;padding:12px;box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:10px}
+  .g-name{font-size:15px;font-weight:700}.g-en{font-size:11px;color:var(--muted)}
+  .g-price{font-size:12px;color:var(--muted);margin-top:6px}.g-price b{color:var(--accent);font-size:14px}
+  .size-opt{display:flex;gap:6px;margin-top:8px}
+  .size{flex:1;text-align:center;font-size:13px;padding:6px 0;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+  .size.on{border-color:var(--accent);background:#fdeee2;color:var(--accent);font-weight:700}
+  .sizeem{font-style:normal;font-size:11px;color:var(--muted);display:block}
+  .addons{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .addon{font-size:11.5px;padding:5px 10px;border-radius:14px;border:1px dashed var(--line);background:#fffdf7;color:var(--muted);cursor:pointer}
+  .addon.on{border-color:var(--green);background:#e7f3ea;color:var(--green)}
+  .addon i{font-style:normal;font-size:10px;color:var(--muted);margin-left:2px}
+  .add-label{font-size:11px;color:#9c8b74;width:100%}
+  .add-btn{margin-top:10px;width:100%;padding:9px 0;border:none;border-radius:10px;background:var(--brand2);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+  .checkout{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;box-shadow:0 -6px 20px rgba(80,50,20,.14)}
+  .co-inner{max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .total .t-label{font-size:11px;color:var(--muted)}.total .t-num{font-size:22px;font-weight:800;color:var(--accent)}
+  .go-pay{padding:12px 26px;border:none;border-radius:12px;background:var(--green);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .go-pay:disabled{background:#cfc2af}
+  .mask{position:fixed;inset:0;z-index:40;background:rgba(30,20,12,.55);display:none;align-items:flex-end;justify-content:center}
+  .mask.show{display:flex}
+  .sheet{width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:22px 18px 30px;animation:up .3s ease}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .sheet h3{font-size:17px}.sheet .sub{font-size:12px;color:var(--muted);margin:4px 0 12px}
+  .order-list{max-height:170px;overflow:auto;border-top:1px solid var(--line)}
+  .orow{display:flex;justify-content:space-between;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:13.5px;gap:8px}
+  .orow .q{color:var(--muted)}.orow .amt{font-weight:700}
+  .o-total{display:flex;justify-content:space-between;padding:12px 2px 4px;font-size:14px;font-weight:800;color:var(--accent)}
+  .field{width:100%;margin-top:12px;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;background:#fbf7ef}
+  .pay-go{margin-top:16px;width:100%;padding:14px 0;border:none;border-radius:12px;background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+  .close-x{float:right;font-size:22px;color:var(--muted);background:none;border:none;cursor:pointer}
+  .pay-hint{font-size:11px;color:var(--muted);margin-top:12px;text-align:center;line-height:1.6}
+  .badges{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+  .badge2{font-size:10px;padding:3px 8px;border-radius:10px;background:#eef2f6;color:#6a7684}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><div class="bar">
+    <div class="logo">🧋</div>
+    <div class="shop"><h1>熊茶館</h1><p>BEAR TEA HOUSE · HONG KONG 手機點單</p></div>
+    <button class="cart-btn" onclick="openCart()">🛒<span class="badge" id="cartBadge">0</span></button>
+  </div></header>
+
+  <div class="tabs" id="tabs"></div>
+  <main id="main"></main>
+
+  <div class="checkout"><div class="co-inner">
+    <div class="total"><div class="t-label">已選 <span id="countLabel">0</span> 件</div><div class="t-num">HK$<span id="totalNum">0</span></div></div>
+    <button class="go-pay" id="goPay" disabled onclick="openPay()">去結算</button>
+  </div></div>
+
+  <div class="mask" id="mask"><div class="sheet"><button class="close-x" onclick="close()">✕</button><div id="sheetBody"></div></div></div>
+</div>
+
+<script>
+var MENU=[
+{cat:"皇牌推介",em:"👑",items:[
+ {name:"鸭屎香手打柠檬茶",en:"Yashi Lemon Tea",m:26,l:29,hot:1},
+ {name:"香槟葡萄梳打",en:"Kyoho Grape Soda",m:26,l:29},
+ {name:"橘枝甘露",en:"Mango Pomelo Sago",m:36,l:39,hot:1},
+ {name:"冬瓜仙草",en:"Winter Melon + Herbal Jelly",m:26,l:29}]},
+{cat:"經典奶茶系列",em:"🥛",items:[
+ {name:"招牌珍珠鲜奶茶",en:"Classic Milk Tea",m:28,l:31},
+ {name:"仙草奶茶",en:"Herbal Jelly Milk Tea",m:26,l:29},
+ {name:"黑糖珍珠鲜奶茶",en:"Brown Sugar Pearl Milk Tea",m:30,l:33}]},
+{cat:"鮮果多多系列",em:"🍉",items:[
+ {name:"西瓜益力多（鲜榨）",en:"Watermelon Yakult",m:33,l:36},
+ {name:"哈密瓜益力多（鲜榨）",en:"Honeydew Yakult",m:33,l:36}]},
+{cat:"特調果茶系列",em:"🍵",items:[
+ {name:"蜂蜜QQ绿茶",en:"Honey Green Tea",m:26,l:29},
+ {name:"百香果绿茶",en:"Passion Fruit Green Tea",m:26,l:29},
+ {name:"荔枝玉露红茶",en:"Lychee Black Tea",m:26,l:29},
+ {name:"芒果椰果乌龙茶",en:"Mango Oolong Tea",m:26,l:29}]},
+{cat:"梳打系列",em:"🥤",items:[
+ {name:"荔枝梳打",en:"Litchi Soda",m:26,l:29},
+ {name:"凤梨果肉梳打",en:"Pineapple Soda",m:26,l:29},
+ {name:"水蜜桃果肉梳打",en:"Peach Soda",m:26,l:29},
+ {name:"芒果百香果梳打",en:"Mango Passion Soda",m:26,l:29},
+ {name:"红西柚果肉梳打",en:"Red Grapefruit Soda",m:26,l:29}]}];
+var ADDONS=["珍珠","仙草凍","荔枝椰果","蘆薈粒","水晶果"],ADDS_PRICE=6;
+var FLAT=[];MENU.forEach(function(g){g.items.forEach(function(it){FLAT.push(it)})});
+var cart={},selected={},activeTab="全部";
+function priceOf(s,it){return s==="L"?it.l:it.m}
+function gs(gi){return selected[gi]||(selected[gi]={size:"M",addons:{}})}
+function renderTabs(){var c=["全部"].concat(MENU.map(function(x){return x.cat})),h="";c.forEach(function(x){h+='<button class="tab'+(x===activeTab?' active':'')+'" onclick="setTab(\''+x+'\')">'+x+'</button>'});document.getElementById("tabs").innerHTML=h}
+function setTab(c){activeTab=c;renderTabs();renderGoods()}
+function renderGoods(){var m="",gi=0;MENU.forEach(function(group){if(activeTab!=="全部"&&activeTab!==group.cat)return;m+='<div class="sec-title"><span>'+group.em+'</span><span>'+group.cat+'</span></div>';group.items.forEach(function(it){var i=gi++;var s=gs(i);m+='<div class="good"><div class="g-name">'+it.name+(it.hot?' 🔥':'')+'</div><div class="g-en">'+it.en+'</div><div class="g-price">中 M <b>$'+it.m+'</b> / 大 L <b>$'+it.l+'</b></div><div class="size-opt"><div class="size'+(s.size==="M"?' on':'')+'" onclick="setSize('+i+',\'M\')">中 M<em class="sizeem">$'+it.m+'</em></div><div class="size'+(s.size==="L"?' on':'')+'" onclick="setSize('+i+',\'L\')">大 L<em class="sizeem">$'+it.l+'</em></div></div><div class="addons"><span class="add-label">加配 ＋$'+ADDS_PRICE+'/份：</span>'+ADDONS.map(function(a,ai){return '<span class="addon'+(s.addons[a]?' on':'')+'" onclick="toggleA('+i+','+ai+')">'+a+'<i>+6</i></span>'}).join('')+'</div><button class="add-btn" onclick="add('+i+')">＋ 加入購物車</button></div>'})});document.getElementById("main").innerHTML=m}
+function setSize(i,sz){gs(i).size=sz;renderGoods()}
+function toggleA(i,ai){var s=gs(i);s.addons[ADDONS[ai]]=!s.addons[ADDONS[ai]];renderGoods()}
+
+function add(i){var it=FLAT[i],s=gs(i),ad=Object.keys(s.addons).filter(function(a){return s.addons[a]});var unit=priceOf(s.size,it)+ad.length*ADDS_PRICE;var key=i+"_"+s.size+"_"+ad.join(",");if(cart[key])cart[key].qty++;else cart[key]={name:it.name,size:s.size,sizeText:s.size==="L"?"大杯":"中杯",unit:unit,addons:ad,qty:1};refresh();toast("已加入")}
+function total(){var t=0;for(var k in cart)t+=cart[k].unit*cart[k].qty;return t}
+function refresh(){var c=0;for(var k in cart)c+=cart[k].qty;document.getElementById("countLabel").textContent=c;document.getElementById("totalNum").textContent=total();document.getElementById("cartBadge").textContent=c;document.getElementById("cartBadge").style.display=c?"flex":"none";document.getElementById("goPay").disabled=!c}
+function orderH(){var h="";for(var k in cart){var it=cart[k];h+='<div class="orow"><div>'+it.name+'（'+it.sizeText+'）'+(it.addons.length?'<div style="color:#9c8b74;font-size:11px">＋'+it.addons.join("、")+'</div>':'')+'<div class="q">×'+it.qty+'</div></div><div class="amt">$'+fmt(it.unit*it.qty)+'</div></div>'}return h}
+function fmt(n){return Math.round(n)}
+function openCart(){if(!Object.keys(cart).length){body('<h3>🛒 購物車</h3><div class="sub">你還沒有選任何飲品</div>');open();return}body('<h3>🛒 已選飲品</h3><div class="order-list">'+orderH()+'</div><div class="o-total"><span>合計</span><span>HK$'+fmt(total())+'</span></div><button class="pay-go" style="background:var(--brand)" onclick="openPay()">去結算</button>');open()}
+function openPay(){body('<h3>💳 前往香港付款</h3><div class="sub">將跳轉至 Stripe 安全收款頁</div><div class="order-list">'+orderH()+'</div><div class="o-total"><span>應付合計</span><span>HK$'+fmt(total())+'</span></div><input class="field" id="phone" placeholder="聯絡電話（選填）"><input class="field" style="margin-top:8px" id="note" placeholder="備註：少冰 / 少甜"><button class="pay-go" onclick="goStripe()">使用 Stripe 付款 HK$'+fmt(total())+'</button><div class="pay-hint">支持八達通 · 轉數快 · 支付寶 · 微信支付 · 信用卡</div><div class="badges"><span class="badge2">八達通</span><span class="badge2">轉數快</span><span class="badge2">支付寶</span><span class="badge2">微信</span><span class="badge2">Visa/Master</span></div>');open()}
+function goStripe(){
+  var items=[];for(var k in cart){var c=cart[k];items.push({name:c.name,size:c.size,qty:c.qty,price:c.unit})}
+  var btn=document.querySelector(".pay-go");if(btn)btn.textContent="正在連接安全付款…";btn.disabled=true;
+  fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:items,total:total(),phone:document.getElementById("phone").value,note:document.getElementById("note").value})})
+    .then(function(r){return r.json()}).then(function(d){if(d.ok&&d.url){location.href=d.url}else{toast(d.msg||"建立結帳失敗")}})
+    .catch(function(){toast("無法連接伺服器")})
+}
+function body(h){document.getElementById("sheetBody").innerHTML=h}
+function open(){document.getElementById("mask").classList.add("show")}
+function close(){document.getElementById("mask").classList.remove("show")}
+document.getElementById("mask").addEventListener("click",function(e){if(e.target===this)close()});
+function toast(t){try{wx.showToast({title:t,icon:"none"})}catch(e){alert(t)}}
+renderTabs();renderGoods();refresh();
+</script>
+</body>
+</html>
