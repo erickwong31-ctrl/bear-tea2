@@ -24,24 +24,32 @@
     <div class="ticket">你的取餐號碼是
       <div id="ticketNum">…</div>
     </div>
-    <div class="tip" id="tip">請留意叫號取餐</div>
+    <div class="tip">請留意叫號取餐</div>
     <a href="/">返回重新點單</a>
   </div>
 
 <script>
 (function(){
-  var s=new URLSearchParams(location.search).get('session_id');
   var num=document.getElementById('ticketNum');
+  // 優先讀取本機存的取餐號（一定顯示）
+  var local=null;
+  try{local=localStorage.getItem('bt_ticket')}catch(e){}
+  if(local){
+    num.innerHTML='<b>'+local+'</b>';
+    return;
+  }
+  // 沒有本機號才嘗試用 Stripe session 查
+  var s=new URLSearchParams(location.search).get('session_id');
   if(s){
     fetch('/api/order?session_id='+encodeURIComponent(s))
       .then(function(r){return r.json()})
       .then(function(d){
-        if(d.ticket){num.innerHTML='<b>'+d.ticket+'</b>';document.getElementById('tip').style.display='block'}
-        else{num.innerHTML='正在處理…'}
+        if(d.ticket){num.innerHTML='<b>'+d.ticket+'</b>'}
+        else{num.innerHTML='—'}
       })
-      .catch(function(){num.innerHTML='--'});
+      .catch(function(){num.innerHTML='—'});
   }else{
-    num.innerHTML='<b>—</b>';
+    num.innerHTML='—';
   }
 })();
 </script>
