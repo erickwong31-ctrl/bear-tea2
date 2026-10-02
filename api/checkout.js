@@ -30,7 +30,9 @@ module.exports = async (req, res) => {
     params.append('metadata[phone]', String((req.body.phone) || '').slice(0, 40));
     params.append('metadata[note]', String((req.body.note) || '').slice(0, 200));
     params.append('metadata[order]', JSON.stringify(items.map(i => ({ n: i.name, z: i.size === 'L' ? '大' : '中', q: i.qty, p: i.price, a: (i.addons || '') }))).slice(0, 400));
-    params.append('client_reference_id', 'BT' + String(Date.now()).slice(-8));
+    var ticket = 'BT' + String(Date.now()).slice(-4);
+    params.append('client_reference_id', ticket);
+    params.append('metadata[ticket]', ticket);
 
     const r = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
